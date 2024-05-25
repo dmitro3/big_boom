@@ -3,7 +3,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import {TonConnectUIProvider} from '@tonconnect/ui-react';
 
-import App from './FluteForest.jsx';
+import App from './BigBoom.jsx';
 import './scss/main.scss';
 import {FixShowing} from './components/FixShowing.js';
 import {DataProvider} from './store/DataProvider.jsx';

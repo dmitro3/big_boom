@@ -1,7 +1,7 @@
 import {useHapticFeedback} from '@altiore/twa';
 import {useCallback} from 'react';
 import {useNavigate} from 'react-router-dom';
-import {TonConnectButton} from '@tonconnect/ui-react';
+import {TonConnectButton, useTonWallet} from '@tonconnect/ui-react';
 
 import arrowRight from '../assets/images/landing-page/arrow-right.svg';
 import logoSvg from '../assets/images/256x256.png';
@@ -16,6 +16,8 @@ const LandingPage = () => {
         impactOccurred('soft');
         navigate(PATH.EventList());
     }, [navigate, impactOccurred]);
+
+    const wallet = useTonWallet();
 
     return (
         <Page className="landing-page">
@@ -35,6 +37,7 @@ const LandingPage = () => {
                 <TonConnectButton/>
             </div>
 
+            {wallet ? <p>Yes</p> : <p>No</p>}
             <button onClick={openListOfEvents} className="arrow-button button">
                 Chain
                 <span className="arrow">
