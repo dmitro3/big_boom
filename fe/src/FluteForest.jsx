@@ -8,7 +8,7 @@ import SlotSelection from './pages/appointment-booking.jsx';
 import RegistrationConfirmation from './pages/successful-booking.jsx';
 
 import { PATH } from './consts.js';
-import TwaWrapper from './components/TwaWrapper.js';
+// import TwaWrapper from './components/TwaWrapper.js';
 
 const FluteForest = () => {
   return (
