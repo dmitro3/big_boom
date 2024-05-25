@@ -1,0 +1,14 @@
+# Mac files
+.DS_Store
+
+# JetBrains
+.idea
+
+# .env
+.env
+
+# node_modules
+node_modules
+
+# build files
+dist

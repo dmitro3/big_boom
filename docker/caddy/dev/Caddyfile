@@ -1,0 +1,18 @@
+{
+	log default {
+		output stdout
+		format console
+		level WARN
+		include http.log.access admin.api
+	}
+}
+
+(domain-handler) {
+	handle {
+		reverse_proxy {$PROJECT_NAME}_ui:5173
+	}
+}
+
+{$DOMAIN} {
+	import domain-handler
+}

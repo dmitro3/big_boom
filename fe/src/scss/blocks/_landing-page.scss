@@ -1,0 +1,49 @@
+.landing-page {
+  &__logo {
+    margin-top: 0px;
+    margin-bottom: 0px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    & > img {
+      border-radius: 24px;
+    }
+  }
+
+  &__icon {
+    @include displayFlex(center, center, column);
+    margin-bottom: 16px;
+
+    &--img {
+      width: 208px;
+      height: 40px;
+    }
+  }
+
+  &__text-wrap {
+    margin-bottom: 8px;
+  }
+
+  &__text {
+    color: $tg-theme-text;
+    text-align: center;
+    font-size: 16px;
+    line-height: 21px;
+  }
+
+  &__bottom {
+    color: $tg-theme-text;
+    text-align: center;
+    font-size: 13px;
+    line-height: 118.5%;
+  }
+}
+
+.invalid-version h1 {
+  padding: 20px;
+  color: red;
+  font-size: 40px;
+  font-weight: 500;
+  line-height: 48px;
+  margin-bottom: 20px;
+}

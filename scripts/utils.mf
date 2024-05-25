@@ -1,0 +1,5 @@
+---------------: # Вспомогательные скрипты для разработки (редко используются напрямую) ---------------
+mac_cert: # Добавить caddy сертификат
+	cp ./docker/caddy/data/caddy/pki/authorities/local/root.crt /tmp/root.crt \
+		&& sudo security add-trusted-cert -d -r trustRoot \
+		-k /Library/Keychains/System.keychain /tmp/root.crt

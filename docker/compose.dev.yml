@@ -1,0 +1,9 @@
+services:
+  big_boom_ui:
+    build:
+      dockerfile: ../docker/fe/dev/Dockerfile
+    restart: unless-stopped
+
+  big_boom_caddy:
+    volumes:
+      - ./caddy/dev/Caddyfile:/etc/caddy/Caddyfile

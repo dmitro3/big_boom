@@ -1,0 +1,28 @@
+services:
+  big_boom_ui:
+    build:
+      context: ../fe
+    container_name: ${PROJECT_NAME}_ui
+    restart: always
+    stdin_open: true
+    stop_signal: SIGINT
+    tty: true
+    volumes:
+      - ../fe/public:/app/public
+      - ../fe/index.html:/app/index.html
+      - ../fe/src:/app/src
+      - /home/node/app/node_modules/
+
+  big_boom_caddy:
+    container_name: ${PROJECT_NAME}_caddy
+    environment:
+      - DOMAIN=${PROJECT_NAME}.local
+      - PROJECT_NAME=${PROJECT_NAME}
+    image: 'caddy:2.7.6-alpine'
+    ports:
+      - '80:80'
+      - '443:443'
+    restart: always
+    volumes:
+      - ./caddy/config:/config
+      - ./caddy/data:/data # where cert and other data will be stored

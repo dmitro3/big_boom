@@ -1,0 +1,12 @@
+services:
+  big_boom_ui:
+    build:
+      dockerfile: ../docker/fe/prod/Dockerfile
+    restart: no
+    volumes:
+      - ../frontend/dist:/app/dist
+
+  big_boom_caddy:
+    volumes:
+      - ./caddy/prod/Caddyfile:/etc/caddy/Caddyfile
+      - ../fe/dist:/usr/share/www

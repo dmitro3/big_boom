@@ -1,0 +1,28 @@
+{
+	log default {
+		format console
+		level WARN
+	}
+}
+
+(domain-handler) {
+	handle /api* {
+		reverse_proxy {$PROJECT_NAME}.api:{$GRPC_PORT}
+	}
+
+	handle {
+		root * /usr/share/www
+		encode gzip
+
+		try_files {path} {path}/index.html {file} /index.html
+
+		file_server {
+			index index.html
+			precompressed gzip
+		}
+	}
+}
+
+{$DOMAIN} {
+	import domain-handler
+}
