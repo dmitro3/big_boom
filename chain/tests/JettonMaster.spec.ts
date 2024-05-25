@@ -4,6 +4,7 @@ import {
     Cell,
     toNano
 } from '@ton/core';
+import { JettonGroup } from '../wrappers/JettonGroup';
 import { JettonMaster } from '../wrappers/JettonMaster';
 import { JettonWallet } from '../wrappers/JettonWallet';
 import '@ton/test-utils';
@@ -106,6 +107,32 @@ describe('TeamMinter', () => {
         expect(str3.length).toEqual(1);
     });
 
+    describe("add group", () => {
+        it("add group seq_num", async () => {
+            let seq_num = await jettonMaster.getGetSeqNum();
+            expect(seq_num).toBe(0n);
+
+            let res = await jettonMaster.send(
+                deployer.getSender(),
+                {
+                    value: toNano('0.5'),
+                },
+                {
+                    $$type: "AddGroup",
+                    query_id: 123n,
+                }
+            );
+
+            let seq_num_new = await jettonMaster.getGetSeqNum();
+            expect(seq_num_new).toBe(1n);
+
+            let group_address = await jettonMaster.getGetJettonGroupAddress(1n, deployer.address);
+            let groupContract = blockchain.openContract(await JettonGroup.fromAddress(group_address));
+            let groupOwner = await groupContract.getGetOwner();
+            expect(groupOwner).toEqualAddress(deployer.address);
+        });
+    });
+
     describe("mint action", () => {
         it("mint and changed amount", async () => {
             const minterDataBefore = await jettonMaster.getGetJettonData();
@@ -119,37 +146,47 @@ describe('TeamMinter', () => {
                 {
                     $$type: "Mint",
                     query_id: 12n,
-                    amount: 100n,
                 }
             );
-            expect(res.transactions.length).toBe(5);
-
-            console.log({
-                deployer: deployer.address,
-                jettonMaster: jettonMaster.address,
-                deployerJettonAddress,
-            });
-            console.log("First", res.transactions[2].events);
-            expect(res.transactions).toHaveTransaction({
-                from: jettonMaster.address,
-                to: deployerJettonAddress,
-
-                aborted: false,
-                deploy: true,
-                success: true,
-            });
+            // expect(res.transactions.length).toBe(3);
+            const seq_num = await jettonMaster.getGetSeqNum();
+            expect(seq_num).toBe(0n);
 
             const minterDataAfter = await jettonMaster.getGetJettonData();
-            expect(minterDataAfter.total_supply).toEqual(100n);
+            expect(minterDataAfter.total_supply).toEqual(0n);
+        });
 
-            // Проверить, что на кошельке администратора есть сумма
-            // let adminJet
-            adminJettonWallet = blockchain.openContract(await JettonWallet.fromAddress(deployerJettonAddress));
-            const jettonData = await adminJettonWallet.getGetWalletData();
-            expect(jettonData.balance).toBe(100n);
+        it("mint after add group", async () => {
+            const minterDataBefore = await jettonMaster.getGetJettonData();
+            expect(minterDataBefore.total_supply).toEqual(0n);
 
-            let c = await blockchain.getContract(deployerJettonAddress);
-            expect(c.balance).toBe(24593169n);
+            let res1 = await jettonMaster.send(
+                deployer.getSender(),
+                {
+                    value: toNano('0.5'),
+                },
+                {
+                    $$type: "AddGroup",
+                    query_id: 123n,
+                }
+            );
+
+            let res2 = await jettonMaster.send(
+                deployer.getSender(),
+                {
+                    value: toNano('0.5'),
+                },
+                {
+                    $$type: "Mint",
+                    query_id: 12n,
+                }
+            );
+            // expect(res.transactions.length).toBe(3);
+            const seq_num = await jettonMaster.getGetSeqNum();
+            expect(seq_num).toBe(1n);
+
+            const minterDataAfter = await jettonMaster.getGetJettonData();
+            expect(minterDataAfter.total_supply).toEqual(100000000000n);
         });
     });
 });

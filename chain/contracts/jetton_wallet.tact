@@ -1,5 +1,6 @@
 import "./msg/token_burn_notification.tact";
 import "./msg/token_excesses.tact";
+import "./msg/token_notification.tact";
 import "./msg/token_transfer_internal.tact";
 
 struct JettonWalletData {
@@ -14,13 +15,6 @@ message(0x595f07bc) TokenBurn {
     amount: Int as coins;
     owner: Address;
     response_destination: Address;
-}
-
-message(0x7362d09c) TokenNotification {
-    query_id: Int as uint64;
-    amount: Int as coins;
-    from: Address;
-    forward_payload: Slice as remaining; // Comment Text message when Transfer the jetton
 }
 
 message(0xf8a7ea5) TokenTransfer {
@@ -42,6 +36,7 @@ contract JettonWallet {
     owner: Address;
     // Мастер контракт жетонов
     jetton: Address;
+//    group: Address;
 
     init(jetton: Address, owner: Address) {
         self.balance = 0;

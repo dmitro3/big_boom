@@ -4,7 +4,10 @@ import "./msg/token_burn_notification.tact";
 import "./msg/token_excesses.tact";
 import "./msg/token_transfer_internal.tact";
 
+import "./jetton_group.tact";
 import "./jetton_wallet.tact";
+
+const MaxSupply: Int = 1000000000000000000000000000;
 
 struct JettonData {
     total_supply: Int as coins;
@@ -16,7 +19,10 @@ struct JettonData {
 
 message Mint {
     query_id: Int as uint64;
-    amount: Int as coins;
+}
+
+message AddGroup {
+    query_id: Int as uint64;
 }
 
 message TokenUpdateContent {
@@ -25,51 +31,101 @@ message TokenUpdateContent {
 
 @interface("org.ton.jetton.master")
 contract JettonMaster with Deployable {
+    seq_num: Int;
     total_supply: Int as coins;
     mintable: Bool;
     admin_address: Address;
     jetton_content: Cell;
+    handled_amount: Int;
 
     init(jetton_content: Cell) {
+        self.handled_amount = 0;
+        self.seq_num = 0;
         self.total_supply = 0;
         self.mintable = true;
         self.admin_address = sender();
         self.jetton_content = jetton_content;
     }
 
-    receive(msg: Mint) {
+    receive(msg: AddGroup) {
         let ctx: Context = context();
         require(ctx.sender == self.admin_address, "Not Admin");
-        require(self.mintable, "Can't Mint Anymore");
 
-        self.total_supply = self.total_supply + msg.amount;
+        self.seq_num = self.seq_num + 1;
 
-        let jetton_wallet: StateInit = self.get_jetton_wallet(self.admin_address);
+        let group_wallet: StateInit = self.get_jetton_group(self.seq_num, sender());
 
         send(SendParameters{
-            to: contractAddress(jetton_wallet),
+            to: contractAddress(group_wallet),
             value: 0,
             bounce: false,
             mode: SendRemainingValue,
             body: TokenTransferInternal{
                 query_id: msg.query_id,
-                amount: msg.amount,
+                amount: 0,
                 from: myAddress(),
-                // Тот, кому нужно возвращать сдачу
                 response_destination: self.admin_address,
-                // Если мы хотим оповестить кошелек получателя о зачислении жетонов,
-                // то нужно положительное значение
                 forward_ton_amount: 0,
                 forward_payload: emptySlice()
             }.toCell(),
-            code: jetton_wallet.code,
-            data: jetton_wallet.data
+            code: group_wallet.code,
+            data: group_wallet.data
+        });
+    }
+
+    receive(msg: Mint) {
+        let ctx: Context = context();
+        require(ctx.sender == self.admin_address || ctx.sender == myAddress(), "Invalid sender");
+        require(self.mintable, "Can't Mint Anymore");
+
+        // нужно проверить деление на 0!!!
+        if (self.seq_num == 0) {
+            return;
+        }
+
+        self.total_supply = self.total_supply + 100000000000;
+        let to_send: Int = self.total_supply / self.seq_num;
+
+        repeat(min(100, self.seq_num - self.handled_amount)) {
+            self.handled_amount = self.handled_amount + 1;
+
+            send(SendParameters{
+                to: self.get_jetton_group_address(self.handled_amount, ctx.sender),
+                value: 0,
+                bounce: true,
+                mode: SendRemainingValue,
+                body: TokenTransferInternal{
+                    query_id: msg.query_id,
+                    amount: to_send,
+                    from: myAddress(),
+                    // Тот, кому нужно возвращать сдачу
+                    response_destination: self.admin_address,
+                    // Если мы хотим оповестить кошелек получателя о зачислении жетонов,
+                    // то нужно положительное значение
+                    forward_ton_amount: 0,
+                    forward_payload: emptySlice()
+                }.toCell()
+            });
+        }
+
+        if (self.seq_num == self.handled_amount) {
+            self.handled_amount = 0;
+            return;
+        }
+
+        send(SendParameters{
+            to: myAddress(),
+            value: 0,
+            mode: SendRemainingValue + SendIgnoreErrors,
+            body: Mint{
+                query_id: msg.query_id
+            }.toCell()
         });
     }
 
     receive(msg: TokenUpdateContent) {
         let ctx: Context = context();
-        require(ctx.sender == self.admin_address, "Not Admin");
+        require(ctx.sender == self.admin_address, "Invalid sender");
 
         self.jetton_content = msg.jetton_content;
     }
@@ -82,15 +138,19 @@ contract JettonMaster with Deployable {
 
         if (msg.response_destination != null) {
             send(SendParameters{
-                to: msg.response_destination!!,
-                value: 0,
-                bounce: false,
-                mode: SendRemainingValue + SendIgnoreErrors,
-                body: TokenExcesses{
-                    query_id: msg.query_id
-                }.toCell()
+            to: msg.response_destination!!,
+            value: 0,
+            bounce: false,
+            mode: SendRemainingValue + SendIgnoreErrors,
+            body: TokenExcesses{
+                query_id: msg.query_id
+            }.toCell()
             });
         }
+    }
+
+    fun get_jetton_group(seq_num: Int, admin: Address): StateInit {
+        return initOf JettonGroup(seq_num, myAddress(), admin);
     }
 
     fun get_jetton_wallet(owner: Address): StateInit {
@@ -107,7 +167,15 @@ contract JettonMaster with Deployable {
         };
     }
 
-    fun get_wallet_address(owner: Address): Address {
+    get fun get_wallet_address(owner: Address): Address {
         return contractAddress(self.get_jetton_wallet(owner));
+    }
+
+    get fun get_jetton_group_address(seq_num: Int, owner: Address): Address {
+        return contractAddress(self.get_jetton_group(seq_num, owner));
+    }
+
+    get fun get_seq_num(): Int {
+        return self.seq_num;
     }
 }
