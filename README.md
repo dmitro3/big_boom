@@ -1,6 +1,8 @@
 # Big Boom (Chain Reaction)
 [RU версия](https://github.com/mirosphere/big_boom/blob/main/README.ru.md)
 
+![](https://raw.githubusercontent.com/mirosphere/big_boom/main/img/256x256.png)
+
 > A viral game whose goal is to build chains of connections between people
 
 ### The Open League Hackathon | TON 25.05.2024

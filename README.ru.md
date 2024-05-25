@@ -1,6 +1,8 @@
 # Большой бум (Цепная реакция)
 [EN version](https://github.com/mirosphere/big_boom/blob/main/README.md)
 
+![](https://raw.githubusercontent.com/mirosphere/big_boom/main/img/256x256.png)
+
 > Вирусная игра, цель которой — выстраивать цепочки связей между людьми
 
 ### Хакатон Открытой Лиги | ТОН 25.05.2024
