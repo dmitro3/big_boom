@@ -15,6 +15,9 @@ struct JettonData {
     mintable: Bool;
     jetton_content: Cell;
     jetton_wallet_code: Cell;
+
+    groups_count: Int;
+    groups_handled: Int;
 }
 
 message Mint {
@@ -31,16 +34,17 @@ message TokenUpdateContent {
 
 @interface("org.ton.jetton.master")
 contract JettonMaster with Deployable {
-    seq_num: Int;
     total_supply: Int as coins;
-    mintable: Bool;
     admin_address: Address;
+    mintable: Bool;
     jetton_content: Cell;
-    handled_amount: Int;
+
+    groups_count: Int;
+    groups_handled: Int;
 
     init(jetton_content: Cell) {
-        self.handled_amount = 0;
-        self.seq_num = 0;
+        self.groups_handled = 0;
+        self.groups_count = 0;
         self.total_supply = 0;
         self.mintable = true;
         self.admin_address = sender();
@@ -51,9 +55,9 @@ contract JettonMaster with Deployable {
         let ctx: Context = context();
         require(ctx.sender == self.admin_address, "Not Admin");
 
-        self.seq_num = self.seq_num + 1;
+        self.groups_count = self.groups_count + 1;
 
-        let group_wallet: StateInit = self.get_jetton_group(self.seq_num, sender());
+        let group_wallet: StateInit = self.get_jetton_group(self.groups_count, sender());
 
         send(SendParameters{
             to: contractAddress(group_wallet),
@@ -66,7 +70,7 @@ contract JettonMaster with Deployable {
                 from: myAddress(),
                 response_destination: self.admin_address,
                 forward_ton_amount: 0,
-                forward_payload: emptySlice()
+                forward_payload: null
             }.toCell(),
             code: group_wallet.code,
             data: group_wallet.data
@@ -79,18 +83,18 @@ contract JettonMaster with Deployable {
         require(self.mintable, "Can't Mint Anymore");
 
         // нужно проверить деление на 0!!!
-        if (self.seq_num == 0) {
+        if (self.groups_count == 0) {
             return;
         }
 
         self.total_supply = self.total_supply + 100000000000;
-        let to_send: Int = self.total_supply / self.seq_num;
+        let to_send: Int = self.total_supply / self.groups_count;
 
-        repeat(min(100, self.seq_num - self.handled_amount)) {
-            self.handled_amount = self.handled_amount + 1;
+        repeat(min(100, self.groups_count - self.groups_handled)) {
+            self.groups_handled = self.groups_handled + 1;
 
             send(SendParameters{
-                to: self.get_jetton_group_address(self.handled_amount, ctx.sender),
+                to: self.get_jetton_group_address(self.groups_handled, ctx.sender),
                 value: 0,
                 bounce: true,
                 mode: SendRemainingValue,
@@ -103,13 +107,13 @@ contract JettonMaster with Deployable {
                     // Если мы хотим оповестить кошелек получателя о зачислении жетонов,
                     // то нужно положительное значение
                     forward_ton_amount: 0,
-                    forward_payload: emptySlice()
+                    forward_payload: null
                 }.toCell()
             });
         }
 
-        if (self.seq_num == self.handled_amount) {
-            self.handled_amount = 0;
+        if (self.groups_count == self.groups_handled) {
+            self.groups_handled = 0;
             return;
         }
 
@@ -138,19 +142,19 @@ contract JettonMaster with Deployable {
 
         if (msg.response_destination != null) {
             send(SendParameters{
-            to: msg.response_destination!!,
-            value: 0,
-            bounce: false,
-            mode: SendRemainingValue + SendIgnoreErrors,
-            body: TokenExcesses{
-                query_id: msg.query_id
-            }.toCell()
+                to: msg.response_destination!!,
+                value: 0,
+                bounce: false,
+                mode: SendRemainingValue + SendIgnoreErrors,
+                body: TokenExcesses{
+                    query_id: msg.query_id
+                }.toCell()
             });
         }
     }
 
-    fun get_jetton_group(seq_num: Int, admin: Address): StateInit {
-        return initOf JettonGroup(seq_num, myAddress(), admin);
+    fun get_jetton_group(groups_count: Int, admin: Address): StateInit {
+        return initOf JettonGroup(groups_count, myAddress(), admin);
     }
 
     fun get_jetton_wallet(owner: Address): StateInit {
@@ -163,7 +167,9 @@ contract JettonMaster with Deployable {
             mintable: self.mintable,
             admin_address: self.admin_address,
             jetton_content: self.jetton_content,
-            jetton_wallet_code: self.get_jetton_wallet(myAddress()).code
+            jetton_wallet_code: self.get_jetton_wallet(myAddress()).code,
+            groups_count: self.groups_count,
+            groups_handled: self.groups_handled
         };
     }
 
@@ -171,11 +177,7 @@ contract JettonMaster with Deployable {
         return contractAddress(self.get_jetton_wallet(owner));
     }
 
-    get fun get_jetton_group_address(seq_num: Int, owner: Address): Address {
-        return contractAddress(self.get_jetton_group(seq_num, owner));
-    }
-
-    get fun get_seq_num(): Int {
-        return self.seq_num;
+    get fun get_jetton_group_address(groups_count: Int, owner: Address): Address {
+        return contractAddress(self.get_jetton_group(groups_count, owner));
     }
 }

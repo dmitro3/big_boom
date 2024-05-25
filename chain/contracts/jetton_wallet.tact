@@ -1,14 +1,8 @@
+import "./msg/jetton_wallet_data.tact";
 import "./msg/token_burn_notification.tact";
 import "./msg/token_excesses.tact";
 import "./msg/token_notification.tact";
 import "./msg/token_transfer_internal.tact";
-
-struct JettonWalletData {
-    balance: Int;
-    owner: Address;
-    jetton: Address;
-    jetton_wallet_code: Cell;
-}
 
 message(0x595f07bc) TokenBurn {
     query_id: Int as uint64;
@@ -24,7 +18,7 @@ message(0xf8a7ea5) TokenTransfer {
     response_destination: Address;
     custom_payload: Cell?;
     forward_ton_amount: Int as coins;
-    forward_payload: Slice as remaining; // Comment Text message when Transfer the jetton
+    forward_payload: Address;
 }
 
 @interface("org.ton.jetton.wallet")
@@ -32,11 +26,11 @@ contract JettonWallet {
     const minTonsForStorage: Int = ton("0.01");
     const gasConsumption: Int = ton("0.01");
 
-    balance: Int;
-    owner: Address;
-    // Мастер контракт жетонов
     jetton: Address;
-//    group: Address;
+    owner: Address;
+    balance: Int as coins;
+
+    next_member: Address?;
 
     init(jetton: Address, owner: Address) {
         self.balance = 0;
@@ -83,12 +77,17 @@ contract JettonWallet {
         // Отправить жетоны не может произвольный контракт не являющийся жетон кошельком
         // Иначе, можно было бы произвольно пополнить себе балланс
         if (ctx.sender != self.jetton) {
-            require(self.get_wallet_address(msg.from) == ctx.sender, "Invalid sender!");
+            require(self.get_wallet_address(msg.from) == ctx.sender, "Invalid sender");
         }
 
         // Update balance
         self.balance = self.balance + msg.amount;
         require(self.balance >= 0, "Invalid balance");
+
+        if (self.next_member == null) {
+            require(msg.forward_payload != null, "Not initialized yet");
+            self.next_member = msg.forward_payload;
+        }
 
         // Get value for gas
         let msgValue: Int = self.msgValue(ctx.value);
@@ -176,10 +175,11 @@ contract JettonWallet {
 
     get fun get_wallet_data(): JettonWalletData {
         return JettonWalletData{
-            balance: self.balance,
-            owner: self.owner,
+            jetton_wallet_code: self.get_jetton_wallet(self.owner).code,
             jetton: self.jetton,
-            jetton_wallet_code: self.get_jetton_wallet(self.owner).code
+            owner: self.owner,
+            balance: self.balance,
+            next_member: self.next_member
         };
     }
 }

@@ -1,16 +1,28 @@
+import "./msg/jetton_group_data.tact";
 import "./msg/token_excesses.tact";
 import "./msg/token_notification.tact";
 import "./msg/token_transfer_internal.tact";
+
+import "./jetton_wallet.tact";
+
+message AddToGroup {
+    // Владелец главного кошелька (не токенов, а тонов)
+    query_id: Int as uint64;
+    from: Address;
+    member: Address;
+}
 
 contract JettonGroup {
     const minTonsForStorage: Int = ton("0.01");
     const gasConsumption: Int = ton("0.01");
 
-    seq_num: Int;
-    mintable: Bool;
-    balance: Int;
     jetton: Address;
     owner: Address;
+    balance: Int as coins;
+    last_member: Address;
+
+    seq_num: Int;
+    mintable: Bool;
 
     init(seq_num: Int, jetton: Address, owner: Address) {
         self.balance = 0;
@@ -18,6 +30,33 @@ contract JettonGroup {
         self.mintable = true;
         self.jetton = jetton;
         self.owner = owner;
+        self.last_member = owner;
+    }
+
+    receive(msg: AddToGroup) {
+        // 1. Может добавлять только валидный кошелек жетонов
+        let ctx: Context = context();
+        require(self.get_wallet_address(msg.from) == ctx.sender, "Invalid sender");
+
+        // 2. Меняем цепочку владельцев
+        let jetton_wallet: StateInit = self.get_jetton_wallet(msg.from);
+        send(SendParameters{
+            to: contractAddress(jetton_wallet),
+            value: 0,
+            bounce: false,
+            mode: SendRemainingValue,
+            body: TokenTransferInternal{
+                query_id: msg.query_id,
+                amount: 0,
+                from: myAddress(),
+                response_destination: msg.from,
+                forward_ton_amount: 0,
+                forward_payload: self.last_member
+            }.toCell(),
+            code: jetton_wallet.code,
+            data: jetton_wallet.data
+        });
+        self.last_member = msg.from;
     }
 
     receive(msg: TokenTransferInternal) { // 0x178d4519
@@ -75,5 +114,26 @@ contract JettonGroup {
 
     get fun get_owner(): Address {
         return self.owner;
+    }
+
+    fun get_jetton_group(): StateInit {
+        return initOf JettonGroup(self.seq_num, self.jetton, self.owner);
+    }
+
+    fun get_jetton_wallet(owner: Address): StateInit {
+        return initOf JettonWallet(self.jetton, owner);
+    }
+
+    fun get_wallet_address(owner: Address): Address {
+        return contractAddress(self.get_jetton_wallet(owner));
+    }
+
+    get fun get_wallet_data(): JettonGroupData {
+        return JettonGroupData{
+            balance: self.balance,
+            owner: self.owner,
+            jetton: self.jetton,
+            jetton_wallet_code: self.get_jetton_group().code
+        };
     }
 }
