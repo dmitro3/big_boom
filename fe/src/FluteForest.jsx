@@ -15,7 +15,7 @@ const FluteForest = () => {
     <TwaLoader
       isTWApp={(
           <BrowserRouter>
-              <TwaWrapper>
+              {/*<TwaWrapper>*/}
                   <Routes>
                       <Route exact path={PATH.Landing()} element={<LandingPage />} />
                       <Route path={PATH.EventList()} element={<EventSelection />} />
@@ -29,7 +29,7 @@ const FluteForest = () => {
                           />}
                       />
                   </Routes>
-              </TwaWrapper>
+              {/*</TwaWrapper>*/}
           </BrowserRouter>
       )}
       noTWApp={(
