@@ -31,6 +31,12 @@
     line-height: 21px;
   }
 
+  &__tg_btn {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+  }
+
   &__bottom {
     color: $tg-theme-text;
     text-align: center;
