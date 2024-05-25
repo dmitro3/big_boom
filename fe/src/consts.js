@@ -1,11 +1,11 @@
 const EVENT_DEF_ID = ':event_id';
 
 export const PATH = {
-  Landing: () => '/',
-  EventList: () => '/events',
-  Event: (event_id = EVENT_DEF_ID) => `/events/${event_id}`,
-  EventBookingConfirm: (event_id = EVENT_DEF_ID) => `/events/${event_id}/booking-confirm`,
-  EventTimeSlots: (event_id = EVENT_DEF_ID) => `/events/${event_id}/time-slots`,
+  Landing: () => '/big_boom/',
+  EventList: () => '/big_boom/events',
+  Event: (event_id = EVENT_DEF_ID) => `/big_boom/events/${event_id}`,
+  EventBookingConfirm: (event_id = EVENT_DEF_ID) => `/big_boom/events/${event_id}/booking-confirm`,
+  EventTimeSlots: (event_id = EVENT_DEF_ID) => `/big_boom/events/${event_id}/time-slots`,
 }
 
 export const DATA_PATH = {
