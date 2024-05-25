@@ -1,4 +1,4 @@
-# team-minter
+# Big Boom (Chain Reaction) minter
 
 ## Project structure
 
