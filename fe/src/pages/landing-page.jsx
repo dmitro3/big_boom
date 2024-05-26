@@ -8,14 +8,25 @@ import logoSvg from '../assets/images/256x256.png';
 import {Page} from '../components/Page';
 import {PATH} from '../consts.js';
 
+const Btn = ({children, onClick}) => {
+    return (
+        <button onClick={onClick} className="arrow-button button">
+            {children}
+            <span className="arrow">
+                <img src={arrowRight} alt="Arrow Right"/>
+            </span>
+        </button>
+    );
+}
+
 const LandingPage = () => {
     const navigate = useNavigate();
     const {impactOccurred} = useHapticFeedback();
 
-    const openListOfEvents = useCallback(() => {
+    const generateGroup = useCallback(() => {
         impactOccurred('soft');
-        navigate(PATH.EventList());
-    }, [navigate, impactOccurred]);
+        // navigate(PATH.EventList());
+    }, [impactOccurred]);
 
     const wallet = useTonWallet();
 
@@ -37,13 +48,11 @@ const LandingPage = () => {
                 <TonConnectButton/>
             </div>
 
-            {wallet ? <p>Yes</p> : <p>No</p>}
-            <button onClick={openListOfEvents} className="arrow-button button">
-                Chain
-                <span className="arrow">
-          <img src={arrowRight} alt="Arrow Right"/>
-        </span>
-            </button>
+            {wallet ? (
+                <div>
+                    <Btn onClick={generateGroup}>Добавить группу</Btn>
+                </div>
+            ) : <span />}
 
             <p className="landing-page__bottom">
                 Принимай приглашения через <b>Telegram</b>

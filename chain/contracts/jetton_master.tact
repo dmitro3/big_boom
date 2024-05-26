@@ -1,13 +1,12 @@
 import "@stdlib/deploy";
 
+import "./msg/group_creating.tact";
 import "./msg/token_burn_notification.tact";
 import "./msg/token_excesses.tact";
 import "./msg/token_transfer_internal.tact";
 
 import "./jetton_group.tact";
 import "./jetton_wallet.tact";
-
-const MaxSupply: Int = 1000000000000000000000000000;
 
 struct JettonData {
     total_supply: Int as coins;
@@ -64,13 +63,8 @@ contract JettonMaster with Deployable {
             value: 0,
             bounce: false,
             mode: SendRemainingValue,
-            body: TokenTransferInternal{
-                query_id: msg.query_id,
-                amount: 0,
-                from: myAddress(),
-                response_destination: self.admin_address,
-                forward_ton_amount: 0,
-                forward_payload: null
+            body: GroupCreating{
+                query_id: msg.query_id
             }.toCell(),
             code: group_wallet.code,
             data: group_wallet.data

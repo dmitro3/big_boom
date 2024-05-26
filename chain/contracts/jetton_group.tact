@@ -1,3 +1,4 @@
+import "./msg/group_creating.tact";
 import "./msg/jetton_group_data.tact";
 import "./msg/token_excesses.tact";
 import "./msg/token_notification.tact";
@@ -6,9 +7,10 @@ import "./msg/token_transfer_internal.tact";
 import "./jetton_wallet.tact";
 
 message AddToGroup {
-    // Владелец главного кошелька (не токенов, а тонов)
     query_id: Int as uint64;
+    // Владелец главного кошелька Ton-ов
     from: Address;
+    // Владелец приглашаемого кошелька Ton-ов
     member: Address;
 }
 
@@ -18,25 +20,27 @@ contract JettonGroup {
 
     jetton: Address;
     owner: Address;
-    balance: Int as coins;
-    last_member: Address;
+
+    member_last: Address;
+    member_pointer: Address;
 
     seq_num: Int;
-    mintable: Bool;
+    members_count: Int;
 
     init(seq_num: Int, jetton: Address, owner: Address) {
-        self.balance = 0;
-        self.seq_num = seq_num;
-        self.mintable = true;
         self.jetton = jetton;
         self.owner = owner;
-        self.last_member = owner;
+
+        self.member_last = owner;
+        self.member_pointer = owner;
+
+        self.seq_num = seq_num;
+        self.members_count = 0;
     }
 
     receive(msg: AddToGroup) {
         // 1. Может добавлять только валидный кошелек жетонов
-        let ctx: Context = context();
-        require(self.get_wallet_address(msg.from) == ctx.sender, "Invalid sender");
+        require(self.get_wallet_address(msg.from) == sender(), "Invalid sender");
 
         // 2. Меняем цепочку владельцев
         let jetton_wallet: StateInit = self.get_jetton_wallet(msg.from);
@@ -51,57 +55,23 @@ contract JettonGroup {
                 from: myAddress(),
                 response_destination: msg.from,
                 forward_ton_amount: 0,
-                forward_payload: self.last_member
+                forward_payload: self.member_last
             }.toCell(),
             code: jetton_wallet.code,
             data: jetton_wallet.data
         });
-        self.last_member = msg.from;
+        self.member_last = msg.from;
+        self.members_count = self.members_count + 1;
     }
 
-    receive(msg: TokenTransferInternal) { // 0x178d4519
+    receive(msg: GroupCreating) {
         let ctx: Context = context();
 
-        // Отправить жетоны может только мастер контракт
+        // Cоздать группу может только мастер контракт
         require(self.jetton == ctx.sender, "Invalid sender!");
 
-        // Update balance
-        self.balance = self.balance + msg.amount;
-        require(self.balance >= 0, "Invalid balance");
-
         // Get value for gas
-        let msgValue: Int = self.msgValue(ctx.value);
-        let fwdFee: Int = ctx.readForwardFee();
-        msgValue = msgValue - msg.forward_ton_amount - fwdFee;
-
-        // 0x7362d09c - notify the new owner of JettonToken that the transfer is complete
-        if (msg.forward_ton_amount > 0) {
-            send(SendParameters{
-                to: self.owner,
-                value: msg.forward_ton_amount,
-                mode: SendPayGasSeparately + SendIgnoreErrors,
-                bounce: false,
-                body: TokenNotification {
-                    query_id: msg.query_id,
-                    amount: msg.amount,
-                    from: msg.from,
-                    forward_payload: msg.forward_payload
-                }.toCell()
-            });
-        }
-
-        // 0xd53276db -- Cashback to the original Sender
-        if (msg.response_destination != null) {
-            send(SendParameters {
-                to: msg.response_destination,
-                value: msgValue,
-                bounce: false,
-                body: TokenExcesses {
-                    query_id: msg.query_id
-                }.toCell(),
-                mode: SendIgnoreErrors
-            });
-        }
+        let msgValue: Int = self.msgValue(ctx.value) - ctx.readForwardFee();
     }
 
     get fun msgValue(value: Int): Int {
@@ -128,9 +98,8 @@ contract JettonGroup {
         return contractAddress(self.get_jetton_wallet(owner));
     }
 
-    get fun get_wallet_data(): JettonGroupData {
+    get fun get_group_data(): JettonGroupData {
         return JettonGroupData{
-            balance: self.balance,
             owner: self.owner,
             jetton: self.jetton,
             jetton_wallet_code: self.get_jetton_group().code

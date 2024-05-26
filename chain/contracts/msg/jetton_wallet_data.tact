@@ -3,5 +3,5 @@ struct JettonWalletData {
     jetton: Address;
     owner: Address;
     balance: Int;
-    next_member: Address?;
+    prev_member: Address?;
 }

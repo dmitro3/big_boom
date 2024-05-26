@@ -182,7 +182,7 @@ describe('TeamMinter', () => {
                     query_id: 12n,
                 }
             );
-            // expect(res.transactions.length).toBe(3);
+            expect(res2.transactions.length).toBe(4);
             const jettonData = await jettonMaster.getGetJettonData();
             expect(jettonData.groups_count).toBe(1n);
 
@@ -191,8 +191,8 @@ describe('TeamMinter', () => {
 
             let group_address = await jettonMaster.getGetJettonGroupAddress(1n, deployer.address);
             const group = blockchain.openContract(await JettonGroup.fromAddress(group_address));
-            const groupBalance = await group.getGetWalletData();
-            expect(groupBalance.balance).toBe(100000000000n);
+            const groupData = await group.getGetGroupData();
+            expect(groupData.owner).toEqualAddress(deployer.address);
         });
     });
 

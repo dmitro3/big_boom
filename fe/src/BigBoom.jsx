@@ -11,52 +11,26 @@ import {PATH} from './consts.js';
 // import TwaWrapper from './components/TwaWrapper.js';
 
 const BigBoom = () => {
+    const body = <BrowserRouter>
+        <Routes>
+            <Route exact path={PATH.Landing()} element={<LandingPage/>}/>
+            <Route path={PATH.EventList()} element={<EventSelection/>}/>
+            <Route path={PATH.Event()} element={<EventAbout/>}/>
+            <Route path={PATH.EventBookingConfirm()} element={<RegistrationConfirmation/>}/>
+            <Route
+                path={PATH.EventTimeSlots()}
+                element={<SlotSelection
+                    storageKey="selectedEvent"
+                    itemType="events"
+                />}
+            />
+        </Routes>
+    </BrowserRouter>;
+
     return (
         <TwaLoader
-            isTWApp={(
-                <BrowserRouter>
-                    {/*<TwaWrapper>*/}
-                    <Routes>
-                        <Route exact path={PATH.Landing()} element={<LandingPage/>}/>
-                        <Route path={PATH.EventList()} element={<EventSelection/>}/>
-                        <Route path={PATH.Event()} element={<EventAbout/>}/>
-                        <Route path={PATH.EventBookingConfirm()} element={<RegistrationConfirmation/>}/>
-                        <Route
-                            path={PATH.EventTimeSlots()}
-                            element={<SlotSelection
-                                storageKey="selectedEvent"
-                                itemType="events"
-                            />}
-                        />
-                    </Routes>
-                    {/*</TwaWrapper>*/}
-                </BrowserRouter>
-            )}
-            noTWApp={(
-                <BrowserRouter>
-                    <Routes>
-                        <Route exact path={PATH.Landing()} element={<LandingPage/>}/>
-                        <Route path={PATH.EventList()} element={<EventSelection/>}/>
-                        <Route path={PATH.Event()} element={<EventAbout/>}/>
-                        <Route path={PATH.EventBookingConfirm()} element={<RegistrationConfirmation/>}/>
-                        <Route
-                            path={PATH.EventTimeSlots()}
-                            element={<SlotSelection
-                                storageKey="selectedEvent"
-                                itemType="events"
-                            />}
-                        />
-                    </Routes>
-                </BrowserRouter>
-            )}
-            // noTWApp={(
-            //   <div className="invalid-version">
-            //     <div className="invalid-version__content">
-            //       <h1>Это приложение только для Telegram</h1>
-            //       <h1>Вы не должны были узнать прямой адрес на него, это был секрет...</h1>
-            //     </div>
-            //   </div>
-            // )}
+            isTWApp={body}
+            noTWApp={body}
             oldTWApp={(
                 <div className="invalid-version">
                     <div className="invalid-version__content">

@@ -30,7 +30,7 @@ contract JettonWallet {
     owner: Address;
     balance: Int as coins;
 
-    next_member: Address?;
+    prev_member: Address?;
 
     init(jetton: Address, owner: Address) {
         self.balance = 0;
@@ -84,9 +84,9 @@ contract JettonWallet {
         self.balance = self.balance + msg.amount;
         require(self.balance >= 0, "Invalid balance");
 
-        if (self.next_member == null) {
+        if (self.prev_member == null) {
             require(msg.forward_payload != null, "Not initialized yet");
-            self.next_member = msg.forward_payload;
+            self.prev_member = msg.forward_payload;
         }
 
         // Get value for gas
@@ -179,7 +179,7 @@ contract JettonWallet {
             jetton: self.jetton,
             owner: self.owner,
             balance: self.balance,
-            next_member: self.next_member
+            prev_member: self.prev_member
         };
     }
 }

@@ -1,6 +1,8 @@
 .button {
-  font-family: "Josefin Sans", sans-serif;
-  background: none;
+  //font-family: "Josefin Sans", sans-serif;
+  background: $tg-theme-button;
+  box-shadow: $color-box-shadow;
+  color: $tg-theme-button-text;
   box-sizing: border-box;
   cursor: pointer;
   border: none;
