@@ -17,8 +17,17 @@
   width: 200px;
   margin-top: 16px;
 
-  &:hover {
+  &:hover,&:active {
     filter: brightness(1.05);
+    &:disabled {
+      filter: none;
+    }
+  }
+  &:disabled {
+    background: gray;
+    &:hover {
+      filter: none;
+    }
   }
 }
 
