@@ -60,12 +60,13 @@ const LandingPage = () => {
                     <span>Создано групп: {value ? value?.groups_count.toString() : '...'}</span>
                     <Btn onClick={generateGroup}>Создать группу</Btn>
                     <Btn onClick={sendInvite} disabled>Отправить приглашение</Btn>
+                    <p className="landing-page__bottom">
+                        Принимай приглашения через <b>Telegram</b>
+                    </p>
                 </div>
-            ) : <span />}
+            ) : <span/>}
 
-            <p className="landing-page__bottom">
-                Принимай приглашения через <b>Telegram</b>
-            </p>
+
         </Page>
     );
 };

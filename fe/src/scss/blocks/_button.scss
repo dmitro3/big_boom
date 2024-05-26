@@ -20,12 +20,14 @@
   &:hover,&:active {
     filter: brightness(1.05);
     &:disabled {
+      cursor: not-allowed;
       filter: none;
     }
   }
   &:disabled {
     background: gray;
     &:hover {
+      cursor: not-allowed;
       filter: none;
     }
   }
