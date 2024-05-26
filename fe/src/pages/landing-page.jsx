@@ -6,7 +6,7 @@ import {TonConnectButton, useTonWallet} from '@tonconnect/ui-react';
 import arrowRight from '../assets/images/landing-page/arrow-right.svg';
 import logoSvg from '../assets/images/256x256.png';
 import {Page} from '../components/Page';
-import {useJettonMasterContract} from "../hooks/useJettonMasterContract";
+import {useJettonMasterContract} from "../hooks/useJettonMasterContract.js";
 
 const Btn = ({children, onClick}) => {
     return (

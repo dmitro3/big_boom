@@ -3,20 +3,20 @@ import {JettonMaster} from '../contracts/JettonMaster';
 import {useTonClient} from './useTonClient';
 import {useAsyncInitialize} from './useAsyncInitialize';
 import {useTonConnect} from './useTonConnect';
-import {Address, OpenedContract} from 'ton-core';
+import {Address} from 'ton-core';
 
-const sleep = (time: number) => new Promise((resolve) => setTimeout(resolve, time));
+const sleep = (time) => new Promise((resolve) => setTimeout(resolve, time));
 
 export function useJettonMasterContract() {
     const client = useTonClient();
-    const [val, setVal] = useState<null | any>();
+    const [val, setVal] = useState();
     const {sender} = useTonConnect();
 
     const counterContract = useAsyncInitialize(async () => {
         if (!client) return;
         return client.open(await JettonMaster.fromAddress(
-            Address.parse('EQBZVBnfFD1tLqF64YIIpyazps2y_aYznKqdsj6I_MaRMBvG')
-        ) as any) as OpenedContract<JettonMaster>;
+            Address.parse('EQBpYg8_BJgF1Zm10ahVX1u55GJzo9LoFV779vKLLzPs0YcU')
+        ));
     }, [client]);
 
     useEffect(() => {

@@ -6,7 +6,6 @@ import {
 } from '@ton/core';
 import { JettonGroup } from '../wrappers/JettonGroup';
 import { JettonMaster } from '../wrappers/JettonMaster';
-// import { JettonWallet } from '../wrappers/JettonWallet';
 import '@ton/test-utils';
 import {
     fromCell,
@@ -78,11 +77,17 @@ describe('TeamMinter', () => {
             // let flag = s.loadUint(8);
             const { flag, content } = await fromCell(cell);
             expect(flag).toBe(0);
-            expect(content).toEqual(jettonData);
+            expect(content).toEqual({
+                name: "Mirosphere",
+                description: "From people to generations",
+                symbol: "MIRO",
+                decimals: 9,
+                image: "https://mirosphere.org/mirosphere.logo.png"
+            });
         });
 
         it("parse string to cell and revert it back", async () => {
-            let myStr = "From people to generations";
+            let myStr = "Chain Reaction";
             let str = st(myStr);
             expect(normalStr(flattenSnakeCell(str).toString("utf-8"))).toEqual(myStr);
         });
@@ -94,13 +99,13 @@ describe('TeamMinter', () => {
         });
 
         it("replace null values in string", async () => {
-            let str1 = normalStr("\x00\x00\x00\x00\x00\x00Mirosphere");
-            expect(str1).toEqual("Mirosphere");
-            expect(str1.length).toEqual(10);
+            let str1 = normalStr("\x00\x00\x00\x00\x00\x00Big Boom");
+            expect(str1).toEqual("Big Boom");
+            expect(str1.length).toEqual(8);
 
-            let str2 = normalStr("\x00\x00\x00\x00\x00\x00From people to generations");
-            expect(str2).toEqual("From people to generations");
-            expect(str2.length).toEqual(26);
+            let str2 = normalStr("\x00\x00\x00\x00\x00\x00Chain Reaction");
+            expect(str2).toEqual("Chain Reaction");
+            expect(str2.length).toEqual(14);
 
             let str3 = normalStr("\x00\x00\x00\x00\x00\x009");
             expect(str3).toEqual("9");

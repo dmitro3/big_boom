@@ -86,9 +86,9 @@ export async function fromCell(cell: Cell): Promise<{flag: number, content: Jett
 }
 
 export const jettonData: JettonContent = {
-    name: "Mirosphere",
-    description: "From people to generations",
-    symbol: "MIRO",
+    name: "Big Boom",
+    description: "Chain Reaction",
+    symbol: "BB",
     decimals: 9,
-    image: "https://mirosphere.org/mirosphere.logo.png"
+    image: "https://raw.githubusercontent.com/mirosphere/big_boom/main/img/256x256.png"
 }
