@@ -8,9 +8,9 @@ import logoSvg from '../assets/images/256x256.png';
 import {Page} from '../components/Page';
 import {useJettonMasterContract} from "../hooks/useJettonMasterContract.js";
 
-const Btn = ({children, onClick}) => {
+const Btn = ({children, disabled, onClick}) => {
     return (
-        <button onClick={onClick} className="button">
+        <button onClick={onClick} className="button" disabled={disabled}>
             {children}
             <span className="arrow">
                 <img src={arrowRight} alt="Arrow Right"/>
@@ -59,7 +59,7 @@ const LandingPage = () => {
                 <div className="landing-page__acts">
                     <span>Создано групп: {value ? value?.groups_count.toString() : '...'}</span>
                     <Btn onClick={generateGroup}>Создать группу</Btn>
-                    <Btn onClick={sendInvite}>Отправить приглашение</Btn>
+                    <Btn onClick={sendInvite} disabled>Отправить приглашение</Btn>
                 </div>
             ) : <span />}
 
