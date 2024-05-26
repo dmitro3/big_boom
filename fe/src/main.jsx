@@ -16,7 +16,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         }}>
             <FixShowing>
                 <DataProvider>
-                    <TonConnectUIProvider manifestUrl={'https://mirosphere.github.io/big_boom/tonconnect-manifest.json'}>
+                    <TonConnectUIProvider manifestUrl="https://mirosphere.github.io/big_boom/tonconnect-manifest.json">
                         <App/>
                     </TonConnectUIProvider>
                 </DataProvider>

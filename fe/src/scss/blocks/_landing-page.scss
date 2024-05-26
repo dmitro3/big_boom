@@ -37,6 +37,14 @@
     justify-content: center;
   }
 
+  &__acts {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    margin-top: 16px;
+  }
+
   &__bottom {
     color: $tg-theme-text;
     text-align: center;

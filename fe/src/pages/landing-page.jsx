@@ -1,12 +1,12 @@
 import {useHapticFeedback} from '@altiore/twa';
 import {useCallback} from 'react';
-import {useNavigate} from 'react-router-dom';
+// import {useNavigate} from 'react-router-dom';
 import {TonConnectButton, useTonWallet} from '@tonconnect/ui-react';
 
 import arrowRight from '../assets/images/landing-page/arrow-right.svg';
 import logoSvg from '../assets/images/256x256.png';
 import {Page} from '../components/Page';
-import {PATH} from '../consts.js';
+import {useJettonMasterContract} from "../hooks/useJettonMasterContract";
 
 const Btn = ({children, onClick}) => {
     return (
@@ -20,10 +20,17 @@ const Btn = ({children, onClick}) => {
 }
 
 const LandingPage = () => {
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
     const {impactOccurred} = useHapticFeedback();
 
-    const generateGroup = useCallback(() => {
+    const {addGroup, value} = useJettonMasterContract();
+
+    const generateGroup = useCallback(async () => {
+        impactOccurred('soft');
+        await addGroup();
+    }, [addGroup, impactOccurred]);
+
+    const sendInvite = useCallback(() => {
         impactOccurred('soft');
         // navigate(PATH.EventList());
     }, [impactOccurred]);
@@ -41,7 +48,7 @@ const LandingPage = () => {
             </div>
 
             <div className="landing-page__icon">
-                <h1>Big Boom (Chain Reaction)</h1>
+                <h1>Big Boom (Цепная реакция)</h1>
             </div>
 
             <div className="landing-page__tg_btn">
@@ -49,8 +56,10 @@ const LandingPage = () => {
             </div>
 
             {wallet ? (
-                <div>
-                    <Btn onClick={generateGroup}>Добавить группу</Btn>
+                <div className="landing-page__acts">
+                    <span>Создано групп: {value ? value?.groups_count.toString() : '...'}</span>
+                    <Btn onClick={generateGroup}>Создать группу</Btn>
+                    <Btn onClick={sendInvite}>Отправить приглашение</Btn>
                 </div>
             ) : <span />}
 
