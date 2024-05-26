@@ -2,6 +2,6 @@
 
 .page_style {
   @include padding;
-
   width: calc(100% - 44px);
+  height: 100vh;
 }
