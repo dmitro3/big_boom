@@ -32,6 +32,15 @@
     line-height: 21px;
   }
 
+  &__test {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    font-weight: bold;
+    color: darkred;
+    margin: 0 0 4px;
+  }
+
   &__tg_btn {
     align-items: center;
     display: flex;

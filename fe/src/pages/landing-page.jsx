@@ -51,6 +51,10 @@ const LandingPage = () => {
                 <h1>Big Boom (Цепная реакция)</h1>
             </div>
 
+            <div className="landing-page__test">
+                TESTNET
+            </div>
+
             <div className="landing-page__tg_btn">
                 <TonConnectButton/>
             </div>
