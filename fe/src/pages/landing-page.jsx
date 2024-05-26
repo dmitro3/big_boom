@@ -10,7 +10,7 @@ import {useJettonMasterContract} from "../hooks/useJettonMasterContract.js";
 
 const Btn = ({children, onClick}) => {
     return (
-        <button onClick={onClick} className="arrow-button button">
+        <button onClick={onClick} className="button">
             {children}
             <span className="arrow">
                 <img src={arrowRight} alt="Arrow Right"/>
